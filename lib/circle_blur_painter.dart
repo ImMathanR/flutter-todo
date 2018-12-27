@@ -4,50 +4,93 @@ import 'package:flutter/material.dart';
 
 class CircleBlurPainter extends CustomPainter {
 
-  CircleBlurPainter({@required this.circleWidth, @required this.color, this.selected});
+  CircleBlurPainter(
+      {@required this.circleWidth, this.colors, this.callback, this.selectedColor});
 
   final double circleWidth;
-  final Color color;
-  bool selected = false;
+  final List<Color> colors;
+  double padding;
+  int selectedColor;
+  final Function(int) callback;
 
   @override
   void paint(Canvas canvas, Size size) {
-    debugPrint("Size Height: " + size.height.toString() + " Width: " + size.width.toString());
-    if(selected) {
-      Paint innerPaint = new Paint()
-        ..color = color
-        ..style = PaintingStyle.fill;
-      Offset center = new Offset(circleWidth / 2, circleWidth / 2);
-      double radius = min(circleWidth / 2, circleWidth / 2);
-      canvas.drawCircle(center, radius, innerPaint);
-     } else {
-      Paint blurPaint = new Paint()
-        ..color = color
-        ..style = PaintingStyle.fill
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0);
-      Offset center = new Offset(90 / 100 * circleWidth / 2, 90 / 100 * circleWidth / 2);
-      double radius = min(circleWidth / 2, circleWidth / 2);
-      canvas.drawCircle(center, radius, blurPaint);
-      Paint innerPaint = new Paint()
-        ..color = color
-        ..style = PaintingStyle.fill;
-      center = new Offset(circleWidth / 2, circleWidth / 2);
-      radius = min(70 / 100 * circleWidth / 2, 70 / 100 * circleWidth / 2);
-      canvas.drawCircle(center, radius, innerPaint);
+    padding = 25;
+    double currentPosition = 0;
+    for (int i = 0; i < this.colors.length; i++) {
+      currentPosition += padding;
+      if (this.selectedColor != i) {
+        Paint blurPaint = new Paint()
+          ..color = colors[i]
+          ..style = PaintingStyle.fill
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 10.0);
+        Offset center = new Offset(
+            circleWidth / 2 + currentPosition, circleWidth / 2);
+        double radius = 80 / 100 * circleWidth / 2;
+        canvas.drawCircle(center, radius, blurPaint);
+        Paint innerPaint = new Paint()
+          ..color = colors[i]
+          ..style = PaintingStyle.fill;
+        center = new Offset(circleWidth / 2 + currentPosition, circleWidth / 2);
+        radius = 60 / 100 * circleWidth / 2;
+        canvas.drawCircle(center, radius, innerPaint);
+        Paint whitePaint = new Paint()
+          ..color = Colors.white
+          ..strokeWidth = circleWidth
+          ..blendMode = BlendMode.src
+          ..style = PaintingStyle.stroke;
+        center = new Offset(circleWidth / 2 + currentPosition, circleWidth / 2);
+        radius = circleWidth;
+        canvas.drawCircle(center, radius, whitePaint);
+      } else {
+        Paint innerPaint = new Paint()
+          ..color = colors[i]
+          ..style = PaintingStyle.fill;
+        Offset center =
+        new Offset(circleWidth / 2 + currentPosition, circleWidth / 2);
+        double radius = circleWidth / 2;
+        canvas.drawCircle(center, radius, innerPaint);
+        // Need to refactor this ugly piece of shit....
+        Path path = new Path();
+        path.moveTo(currentPosition + circleWidth / 4 - 0.5, circleWidth / 2 + 0.5);
+        path.lineTo(
+            currentPosition + circleWidth / 2 - 1, circleWidth - circleWidth / 4 - 2);
+        path.lineTo(
+            currentPosition + circleWidth - circleWidth / 3 + 1, circleWidth / 3);
+        Paint tickPaint = new Paint()
+          ..color = Colors.white
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke;
+        canvas.drawPath(path, tickPaint);
+      }
+      currentPosition += circleWidth;
     }
   }
 
   @override
   bool shouldRepaint(CircleBlurPainter oldDelegate) {
-    return oldDelegate.selected != this.selected;
-  }
-
-  @override
-  bool hitTest(Offset position) {
     return true;
   }
 
   @override
-  bool shouldRebuildSemantics(CircleBlurPainter oldDelegate) => true;
+  bool hitTest(Offset position) {
+    double currentPosition = 0;
+    for (int i = 0; i < this.colors.length; i++) {
+      currentPosition += padding;
+      Rect rect = Rect.fromLTRB(
+          currentPosition, 0, currentPosition + this.circleWidth, 30);
+      if (rect.contains(position)) {
+        this.selectedColor = i;
+        callback(this.selectedColor);
+        return true;
+      }
+      if (i + 1 != this.colors.length) {
+        currentPosition += circleWidth;
+      }
+    }
+    return false;
+  }
 
+  @override
+  bool shouldRebuildSemantics(CircleBlurPainter oldDelegate) => false;
 }

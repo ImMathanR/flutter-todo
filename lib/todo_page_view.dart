@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import './todo_page.dart';
-import 'fancy_button.dart';
 import 'app_bar_clipper.dart';
-import 'todo_title_view.dart';
 import 'todo_title.dart';
 
 class TodoAppView extends TodoAppViewModel {
@@ -12,9 +10,11 @@ class TodoAppView extends TodoAppViewModel {
     return new MaterialApp(
       theme: ThemeData(
         primaryColor: Color(int.parse("FF7070B5", radix: 16)),
-        fontFamily: 'Quicksand'
+        fontFamily: 'Quicksand',
+        backgroundColor: Colors.white
       ),
       home: new Scaffold(
+        backgroundColor: Colors.white,
         body: Column(
           children: <Widget>[
             AppBar(
