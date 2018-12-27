@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './todo_page.dart';
 import 'app_bar_clipper.dart';
 import 'todo_title.dart';
+import 'dialog_clipper.dart';
 
 class TodoAppView extends TodoAppViewModel {
 
@@ -28,7 +29,14 @@ class TodoAppView extends TodoAppViewModel {
               ),
               clipper: AppBarClipper(),
             ),
-            TodoTitle()
+            TodoTitle(),
+            ClipPath(
+              child: Container(
+                height: 70,
+                color: Color(int.parse("FF7070B5", radix: 16)),
+              ),
+              clipper: DialogClipper(),
+            )
           ],
         )
       ),
